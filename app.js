@@ -39,20 +39,30 @@ app.post("/",function(req, res){
         else if(response.statusCode != 200) return console.error('Error:', response.statusCode, body.toString('utf8'));
         else {
             const sendQuote = JSON.parse(body);
-            sendQuote.forEach(function(data){
+            sendQuote.forEach(async function(data){
                 const mailOptions = {
                     from : process.env.EMAIL,
                     to : email,
                     subject : "'" + category +"'" + " Quotes",
                     text : "'"+data.quote + "'\n- " + data.author
                 };
-                transport.sendMail(mailOptions, function(err, info){
-                    if(err){
-                        console.log(err);
-                    }else {
-                        console.log("Email sent "+info.response);
-                    }
-                });
+                // transport.sendMail(mailOptions, function(err, info){
+                //     if(err){
+                //         console.log(err);
+                //     }else {
+                //         console.log("Email sent "+info.response);
+                //     }
+                // });
+                await new Promise((resolve, reject) => {
+                    transport.sendMail(mailOptions, (err, info) => {
+                      if (err) {
+                        console.error(err);
+                        reject(err);
+                      } else {
+                        resolve(info);
+                      }
+                    });
+                  });
             });
             
             res.redirect("/");    
